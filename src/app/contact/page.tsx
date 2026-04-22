@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Phone, Mail, MapPin, Clock, CalendarCheck, MessageSquare, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
 import DatePicker from "@/components/DatePicker";
 
-export default function ContactPage() {
+function ContactPageInner() {
   const searchParams = useSearchParams();
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -329,5 +329,13 @@ export default function ContactPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ContactPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-black" />}>
+      <ContactPageInner />
+    </Suspense>
   );
 }
