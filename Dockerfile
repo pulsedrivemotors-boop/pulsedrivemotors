@@ -24,6 +24,9 @@ COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 COPY --from=builder /app/prisma ./prisma
 
+# Remove prisma.config.ts — not needed at runtime, causes module errors
+RUN rm -f /app/prisma.config.ts
+
 # Install prisma CLI for migrations
 RUN npm install -g prisma
 
