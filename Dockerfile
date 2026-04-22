@@ -19,20 +19,23 @@ COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
 
-# Prisma client + migration files
+# Prisma client (generated) + adapter + native SQLite bindings
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
+COPY --from=builder /app/node_modules/bindings ./node_modules/bindings
+
+# Migration SQL files
 COPY --from=builder /app/prisma ./prisma
 
-# Custom migration runner (no Prisma CLI needed)
+# Migration runner script
 COPY migrate.js ./migrate.js
+
+# Startup script
+COPY start.sh ./start.sh
+RUN chmod +x ./start.sh
 
 # Remove prisma.config.ts — not needed at runtime
 RUN rm -f /app/prisma.config.ts
-
-# Startup script (runs migrations then starts server)
-COPY start.sh ./start.sh
-RUN chmod +x ./start.sh
 
 # Directory for SQLite database
 RUN mkdir -p /app/data
