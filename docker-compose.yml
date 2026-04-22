@@ -1,0 +1,24 @@
+services:
+  pulse-drive:
+    build: .
+    restart: always
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=file:/app/data/prod.db
+      - GMAIL_USER=${GMAIL_USER}
+      - GMAIL_APP_PASSWORD=${GMAIL_APP_PASSWORD}
+      - NOTIFICATION_EMAIL=${NOTIFICATION_EMAIL}
+    volumes:
+      - ./data:/app/data
+    networks:
+      - traefik
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.pulse-drive.rule=Host(`pulsedrivemotors.ca`) || Host(`www.pulsedrivemotors.ca`)"
+      - "traefik.http.routers.pulse-drive.entrypoints=websecure"
+      - "traefik.http.routers.pulse-drive.tls.certresolver=le"
+      - "traefik.http.services.pulse-drive.loadbalancer.server.port=3000"
+
+networks:
+  traefik:
+    external: true

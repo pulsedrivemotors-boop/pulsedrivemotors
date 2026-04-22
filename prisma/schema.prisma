@@ -1,0 +1,95 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model AdminUser {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      String   @default("SALES")
+  leads     Lead[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Vehicle {
+  id           String    @id @default(cuid())
+  vin          String    @unique
+  make         String
+  model        String
+  year         Int
+  trim         String    @default("")
+  bodyType     String    @default("")
+  drivetrain   String    @default("")
+  fuelType     String    @default("")
+  odometer     Int       @default(0)
+  price        Float     @default(0)
+  discountPrice Float?
+  photos       String    @default("[]")
+  description  String    @default("")
+  status       String    @default("available")
+  features     String    @default("[]")
+  engine       String    @default("")
+  transmission String    @default("")
+  color        String    @default("")
+  doors        Int       @default(4)
+  seats        Int       @default(5)
+  featured     Boolean   @default(false)
+  carfaxUrl    String    @default("")
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
+}
+
+model Lead {
+  id              String         @id @default(cuid())
+  name            String
+  phone           String?
+  email           String?
+  message         String?
+  source          String         @default("website")
+  status          String         @default("new")
+  vehicleInterest String?
+  managerId       String?
+  manager         AdminUser?     @relation(fields: [managerId], references: [id])
+  activities      LeadActivity[]
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  deletedAt       DateTime?
+}
+
+model LeadActivity {
+  id        String   @id @default(cuid())
+  leadId    String
+  lead      Lead     @relation(fields: [leadId], references: [id])
+  note      String
+  createdAt DateTime @default(now())
+}
+
+model BlogPost {
+  id        String   @id @default(cuid())
+  title     String
+  slug      String   @unique
+  excerpt   String   @default("")
+  content   String   @default("")
+  category  String   @default("General")
+  image     String   @default("")
+  published Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ImportLog {
+  id        String   @id @default(cuid())
+  fileName  String
+  fileType  String
+  success   Boolean
+  message   String?
+  count     Int      @default(0)
+  createdAt DateTime @default(now())
+}
