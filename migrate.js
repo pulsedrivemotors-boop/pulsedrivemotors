@@ -2,7 +2,7 @@
  * Lightweight migration runner — no Prisma CLI needed.
  * Uses @prisma/client (already in standalone) + raw SQL files.
  */
-const { PrismaClient } = require('./.prisma/client');
+const { PrismaClient } = require('/app/node_modules/@prisma/client');
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
