@@ -19,15 +19,16 @@ COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
 
-# Prisma client + CLI (needed at runtime)
+# Prisma client + migration files
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
-COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
 COPY --from=builder /app/prisma ./prisma
 
-# Remove auto-generated config, copy production one (no dotenv dependency)
+# Custom migration runner (no Prisma CLI needed)
+COPY migrate.js ./migrate.js
+
+# Remove prisma.config.ts — not needed at runtime
 RUN rm -f /app/prisma.config.ts
-COPY prisma.config.prod.ts ./prisma.config.ts
 
 # Startup script (runs migrations then starts server)
 COPY start.sh ./start.sh
