@@ -26,6 +26,7 @@ export default function VehicleGallery({ photos, alt, status }: Props) {
           src={photos[active]}
           alt={`${alt} — photo ${active + 1}`}
           fill
+          unoptimized={photos[active].startsWith('/uploads/')}
           className="object-cover"
           priority={active === 0}
           sizes="(max-width: 1024px) 100vw, 66vw"
@@ -75,7 +76,7 @@ export default function VehicleGallery({ photos, alt, status }: Props) {
                 i === active ? 'border-lime-500' : 'border-white/10 hover:border-white/30'
               }`}
             >
-              <Image src={photo} alt={`Thumbnail ${i + 1}`} fill className="object-cover" sizes="96px" />
+              <Image src={photo} alt={`Thumbnail ${i + 1}`} fill unoptimized={photo.startsWith('/uploads/')} className="object-cover" sizes="96px" />
             </button>
           ))}
         </div>

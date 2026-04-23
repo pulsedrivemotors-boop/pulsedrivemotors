@@ -126,7 +126,7 @@ export default function AdminVehiclesPage() {
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
                         <div className="w-12 h-9 bg-gray-800 rounded overflow-hidden flex-shrink-0">
-                          {v.photos?.[0] && <Image src={v.photos[0]} alt="" width={48} height={36} className="object-cover w-full h-full" />}
+                          {v.photos?.[0] && <Image src={v.photos[0]} alt="" width={48} height={36} unoptimized={v.photos[0].startsWith('/uploads/')} className="object-cover w-full h-full" />}
                         </div>
                         <div>
                           <p className="text-white font-medium">{v.year} {v.make} {v.model}</p>

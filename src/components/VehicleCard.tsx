@@ -17,6 +17,7 @@ export default function VehicleCard({ vehicle }: VehicleCardProps) {
             src={vehicle.photos[0]}
             alt={`${vehicle.year} ${vehicle.make} ${vehicle.model}`}
             fill
+            unoptimized={vehicle.photos[0].startsWith('/uploads/')}
             className="object-cover group-hover:scale-105 transition-transform duration-500"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
