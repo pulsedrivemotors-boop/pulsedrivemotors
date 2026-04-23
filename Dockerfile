@@ -5,6 +5,7 @@ COPY package*.json ./
 RUN npm install
 
 COPY . .
+RUN rm -f prisma/dev.db prisma/*.db-journal
 RUN npx prisma generate
 RUN npm run build
 
