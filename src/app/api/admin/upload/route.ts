@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getToken } from 'next-auth/jwt'
-import { writeFile, mkdir } from 'fs/promises'
+import { mkdir } from 'fs/promises'
 import path from 'path'
+import sharp from 'sharp'
 
 export async function POST(request: NextRequest) {
   const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET })
@@ -20,14 +21,21 @@ export async function POST(request: NextRequest) {
   }
 
   const bytes = await file.arrayBuffer()
-  const buffer = Buffer.from(bytes)
+  const inputBuffer = Buffer.from(bytes)
 
-  const ext = path.extname(file.name) || '.jpg'
-  const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}${ext}`
+  // Convert to WebP: resize to max 1920px wide, quality 85
+  const webpBuffer = await sharp(inputBuffer)
+    .resize({ width: 1920, withoutEnlargement: true })
+    .webp({ quality: 85 })
+    .toBuffer()
+
+  const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}.webp`
 
   const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'vehicles')
   await mkdir(uploadDir, { recursive: true })
-  await writeFile(path.join(uploadDir, filename), buffer)
+
+  const { writeFile } = await import('fs/promises')
+  await writeFile(path.join(uploadDir, filename), webpBuffer)
 
   return NextResponse.json({ url: `/uploads/vehicles/${filename}` })
 }
