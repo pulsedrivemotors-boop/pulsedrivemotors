@@ -29,8 +29,61 @@ To learn more about Next.js, take a look at the following resources:
 
 You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-## Deploy on Vercel
+## Deployment
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Production runs on a Hetzner VPS (`89.167.60.131`) under Docker, fronted by Traefik (TLS via Let's Encrypt). The site is served at https://pulsedrivemotors.ca.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Layout on the server
+
+- App checkout: `/opt/pulse-drive/pulsedrivemotors/` (clone of this repo, same `origin`)
+- Traefik: `/opt/traefik/` (separate `docker-compose.yml`, provides the external `traefik` network)
+- SQLite DB: `/opt/pulse-drive/pulsedrivemotors/data/prod.db` (bind-mounted into the container at `/app/data/`)
+- User uploads: `/opt/pulse-drive/pulsedrivemotors/uploads/` (bind-mounted at `/app/public/uploads/`)
+- Env vars: `/opt/pulse-drive/pulsedrivemotors/.env` (read by `docker compose` for `${...}` substitution in `docker-compose.yml`)
+
+### Server-local files that diverge from the repo
+
+The server's `docker-compose.yml` has extra env vars and an uploads volume that aren't committed (intentional — they're infra config). The file shows as modified in `git status` on the server. **Do not `git checkout` it during a deploy** — preserve it.
+
+### Deploy procedure
+
+GitHub SSH access on the server uses a non-default key at `/root/.ssh/github`, so `git pull` must be invoked with `GIT_SSH_COMMAND` pointing at it.
+
+1. From your dev machine, push to `main`:
+   ```bash
+   git push origin main
+   ```
+2. SSH to the server and pull + rebuild:
+   ```bash
+   ssh root@89.167.60.131
+   cd /opt/pulse-drive/pulsedrivemotors
+
+   # Drop any leftover WIP that's been superseded by commits — but
+   # NEVER touch docker-compose.yml (server-only config lives there).
+   git checkout -- Dockerfile package.json src/
+
+   GIT_SSH_COMMAND='ssh -i /root/.ssh/github -o IdentitiesOnly=yes' \
+     git pull origin main
+
+   docker compose up --build -d
+   ```
+3. Verify:
+   ```bash
+   curl -sI https://pulsedrivemotors.ca/ | head -1   # expect HTTP/2 200
+   docker logs --tail 30 pulsedrivemotors-pulse-drive-1
+   ```
+
+### Migrations
+
+Run automatically on container start via `start.sh` → `migrate.js`. No manual step needed.
+
+### Rollback
+
+```bash
+ssh root@89.167.60.131
+cd /opt/pulse-drive/pulsedrivemotors
+git reset --hard <previous-good-sha>
+docker compose up --build -d
+```
+
+The `data/` and `uploads/` directories are not in git and survive rebuilds. If a migration breaks the DB, restore `data/prod.db` from a snapshot before rolling code back.
