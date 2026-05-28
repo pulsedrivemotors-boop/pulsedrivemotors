@@ -36,7 +36,7 @@ interface Props {
 
 const MIN_PRICE   = 0;
 const MAX_PRICE   = 150000;
-const MAX_MILEAGE = 200000;
+const MAX_MILEAGE = 300000;
 
 export default function InventoryClient({ vehicles, isSoldView }: Props) {
   const searchParams = useSearchParams();
@@ -64,7 +64,7 @@ export default function InventoryClient({ vehicles, isSoldView }: Props) {
       if (selectedFuel && v.fuelType !== selectedFuel) return false;
       if (minPrice > MIN_PRICE && v.price < minPrice) return false;
       if (maxPrice < MAX_PRICE && v.price > maxPrice) return false;
-      if (v.odometer > maxMileage) return false;
+      if (maxMileage < MAX_MILEAGE && v.odometer > maxMileage) return false;
       return true;
     });
 
@@ -241,7 +241,7 @@ export default function InventoryClient({ vehicles, isSoldView }: Props) {
           className="w-full accent-lime-500"
         />
         <div className="flex justify-between text-xs text-gray-600 mt-1">
-          <span>0 km</span><span>200k+</span>
+          <span>0 km</span><span>300k+</span>
         </div>
       </div>
 
