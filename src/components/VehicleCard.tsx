@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Fuel, Gauge, Settings, Tag } from "lucide-react";
+import { Fuel, Gauge, Settings, Tag, CarFront } from "lucide-react";
 import type { Vehicle } from "@/data/vehicles";
 
 interface VehicleCardProps {
@@ -8,19 +8,26 @@ interface VehicleCardProps {
 }
 
 export default function VehicleCard({ vehicle }: VehicleCardProps) {
+  const cover = vehicle.photos[0];
   return (
     <Link href={`/inventory/${vehicle.id}`} className="group block">
       <div className="bg-gray-900 border border-white/10 rounded-xl overflow-hidden card-hover neon-border h-full flex flex-col">
         {/* Image */}
         <div className="relative h-56 overflow-hidden bg-gray-800">
-          <Image
-            src={vehicle.photos[0]}
-            alt={`${vehicle.year} ${vehicle.make} ${vehicle.model}`}
-            fill
-            unoptimized={vehicle.photos[0].startsWith('/uploads/')}
-            className="object-cover group-hover:scale-105 transition-transform duration-500"
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          />
+          {cover ? (
+            <Image
+              src={cover}
+              alt={`${vehicle.year} ${vehicle.make} ${vehicle.model}`}
+              fill
+              unoptimized={cover.startsWith('/uploads/')}
+              className="object-cover group-hover:scale-105 transition-transform duration-500"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center text-gray-600">
+              <CarFront size={48} />
+            </div>
+          )}
           <div className="absolute top-3 left-3 flex gap-2">
             <span className={`text-xs font-bold px-2 py-1 rounded-full ${vehicle.status === "new" ? "bg-lime-500 text-black" : "bg-black/70 text-lime-400 border border-lime-500/40"}`}>
               {vehicle.status === "new" ? "NEW" : "USED"}
