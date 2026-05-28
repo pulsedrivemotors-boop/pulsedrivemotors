@@ -19,23 +19,43 @@ import { prisma } from "@/lib/prisma";
 import VehicleCard from "@/components/VehicleCard";
 
 export default async function HomePage() {
-  const rawVehicles = await prisma.vehicle.findMany({
-    where: { deletedAt: null, status: 'available', NOT: { discountPrice: null } },
-    orderBy: { createdAt: 'desc' },
-    take: 6,
-  });
-  const featuredVehicles = rawVehicles.map(v => ({
-    ...v,
-    photos: JSON.parse(v.photos || '[]') as string[],
-    features: JSON.parse(v.features || '[]') as string[],
-  }));
+  type VehicleRow = Awaited<ReturnType<typeof prisma.vehicle.findMany>>[number];
+  let featuredVehicles: Array<Omit<VehicleRow, "photos" | "features"> & {
+    photos: string[];
+    features: string[];
+  }> = [];
+  let blogPosts: Array<{
+    id: string;
+    title: string;
+    slug: string;
+    excerpt: string;
+    category: string;
+    image: string;
+    createdAt: Date;
+    content: string;
+  }> = [];
 
-  const blogPosts = await prisma.blogPost.findMany({
-    where: { published: true },
-    orderBy: { createdAt: 'desc' },
-    take: 3,
-    select: { id: true, title: true, slug: true, excerpt: true, category: true, image: true, createdAt: true, content: true },
-  });
+  try {
+    const rawVehicles = await prisma.vehicle.findMany({
+      where: { deletedAt: null, status: 'available', NOT: { discountPrice: null } },
+      orderBy: { createdAt: 'desc' },
+      take: 6,
+    });
+    featuredVehicles = rawVehicles.map(v => ({
+      ...v,
+      photos: JSON.parse(v.photos || '[]') as string[],
+      features: JSON.parse(v.features || '[]') as string[],
+    }));
+
+    blogPosts = await prisma.blogPost.findMany({
+      where: { published: true },
+      orderBy: { createdAt: 'desc' },
+      take: 3,
+      select: { id: true, title: true, slug: true, excerpt: true, category: true, image: true, createdAt: true, content: true },
+    });
+  } catch (err) {
+    console.error('[HomePage] DB query failed, rendering with empty data:', err);
+  }
 
   return (
     <div className="bg-black">
