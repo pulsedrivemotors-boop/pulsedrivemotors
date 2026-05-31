@@ -18,32 +18,48 @@ model AdminUser {
 }
 
 model Vehicle {
-  id           String    @id @default(cuid())
-  vin          String    @unique
-  make         String
-  model        String
-  year         Int
-  trim         String    @default("")
-  bodyType     String    @default("")
-  drivetrain   String    @default("")
-  fuelType     String    @default("")
-  odometer     Int       @default(0)
-  price        Float     @default(0)
+  id            String        @id @default(cuid())
+  vin           String        @unique
+  make          String
+  model         String
+  year          Int
+  trim          String        @default("")
+  bodyType      String        @default("")
+  drivetrain    String        @default("")
+  fuelType      String        @default("")
+  odometer      Int           @default(0)
+  price         Float         @default(0)
   discountPrice Float?
-  photos       String    @default("[]")
-  description  String    @default("")
-  status       String    @default("available")
-  features     String    @default("[]")
-  engine       String    @default("")
-  transmission String    @default("")
-  color        String    @default("")
-  doors        Int       @default(4)
-  seats        Int       @default(5)
-  featured     Boolean   @default(false)
-  carfaxUrl    String    @default("")
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  deletedAt    DateTime?
+  purchasePrice Float?
+  soldPrice     Float?
+  purchaseDate  DateTime?
+  soldDate      DateTime?
+  photos        String        @default("[]")
+  description   String        @default("")
+  status        String        @default("available")
+  features      String        @default("[]")
+  engine        String        @default("")
+  transmission  String        @default("")
+  color         String        @default("")
+  doors         Int           @default(4)
+  seats         Int           @default(5)
+  featured      Boolean       @default(false)
+  carfaxUrl     String        @default("")
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  deletedAt     DateTime?
+  costs         VehicleCost[]
+}
+
+model VehicleCost {
+  id          String   @id @default(cuid())
+  vehicleId   String
+  vehicle     Vehicle  @relation(fields: [vehicleId], references: [id])
+  category    String
+  description String   @default("")
+  amount      Float
+  date        DateTime @default(now())
+  createdAt   DateTime @default(now())
 }
 
 model Lead {

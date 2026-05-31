@@ -2,7 +2,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { signOut } from 'next-auth/react'
-import { LayoutDashboard, Car, Users, FileText, Upload, LogOut, ExternalLink, Menu, X, Star } from 'lucide-react'
+import { LayoutDashboard, Car, Users, FileText, Upload, LogOut, ExternalLink, Menu, X, Star, BookOpen } from 'lucide-react'
 import { useState } from 'react'
 
 const navItems = [
@@ -15,7 +15,11 @@ const navItems = [
   { href: '/admin/blog/new', label: 'New Post', icon: FileText, sub: true },
 ]
 
-function SidebarContent({ userName, pathname, onNavClick }: { userName?: string; pathname: string; onNavClick: () => void }) {
+const ownerItems = [
+  { href: '/admin/accounting', label: 'Accounting', icon: BookOpen },
+]
+
+function SidebarContent({ userName, role, pathname, onNavClick }: { userName?: string; role?: string; pathname: string; onNavClick: () => void }) {
   const isActive = (href: string, exact?: boolean) => exact ? pathname === href : pathname.startsWith(href) && (href !== '/admin' || pathname === '/admin')
 
   return (
@@ -49,6 +53,28 @@ function SidebarContent({ userName, pathname, onNavClick }: { userName?: string;
             </Link>
           )
         })}
+
+        {/* Owner-only section */}
+        {role === 'OWNER' && (
+          <>
+            <div className="mt-4 mb-2 px-3">
+              <p className="text-gray-600 text-xs uppercase tracking-wider">Owner</p>
+            </div>
+            {ownerItems.map((item) => {
+              const Icon = item.icon
+              const active = isActive(item.href)
+              return (
+                <Link key={item.href} href={item.href}
+                  onClick={onNavClick}
+                  className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg mb-1 text-sm transition-colors ${active ? 'bg-lime-500/20 text-lime-400 font-medium' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
+                >
+                  <Icon size={16} />
+                  {item.label}
+                </Link>
+              )
+            })}
+          </>
+        )}
       </nav>
 
       {/* Footer */}
@@ -66,7 +92,7 @@ function SidebarContent({ userName, pathname, onNavClick }: { userName?: string;
   )
 }
 
-export default function AdminSidebar({ userName }: { userName?: string }) {
+export default function AdminSidebar({ userName, role }: { userName?: string; role?: string }) {
   const pathname = usePathname()
   const [mobileOpen, setMobileOpen] = useState(false)
 
@@ -85,12 +111,12 @@ export default function AdminSidebar({ userName }: { userName?: string }) {
 
       {/* Mobile Sidebar */}
       <aside className={`lg:hidden fixed left-0 top-0 bottom-0 w-60 bg-[#111111] border-r border-white/10 z-50 transition-transform ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-        <SidebarContent userName={userName} pathname={pathname} onNavClick={() => setMobileOpen(false)} />
+        <SidebarContent userName={userName} role={role} pathname={pathname} onNavClick={() => setMobileOpen(false)} />
       </aside>
 
       {/* Desktop Sidebar */}
       <aside className="hidden lg:flex flex-col w-56 flex-shrink-0 bg-[#111111] border-r border-white/10 min-h-screen">
-        <SidebarContent userName={userName} pathname={pathname} onNavClick={() => {}} />
+        <SidebarContent userName={userName} role={role} pathname={pathname} onNavClick={() => {}} />
       </aside>
     </>
   )

@@ -9,7 +9,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   return (
     <SessionProvider session={session}>
       <div className="flex min-h-screen bg-[#0a0a0a]">
-        {session && <AdminSidebar userName={session.user?.email ?? undefined} />}
+        {session && <AdminSidebar userName={session.user?.email ?? undefined} role={(session.user as any)?.role} />}
         <main className="flex-1 min-w-0 overflow-auto">
           {children}
         </main>
