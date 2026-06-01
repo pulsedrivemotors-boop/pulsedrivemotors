@@ -76,8 +76,8 @@ export default function PhotoUploader({ photos, onChange }: PhotoUploaderProps) 
 
     const results = await Promise.all(
       eligible.map(async (file, idx) => {
-        if (file.size > 10 * 1024 * 1024) {
-          return { id: batch[idx].id, error: `${file.name}: too large (max 10MB)` }
+        if (file.size > 25 * 1024 * 1024) {
+          return { id: batch[idx].id, error: `${file.name}: too large (max 25MB)` }
         }
         const form = new FormData()
         form.append('file', file)
