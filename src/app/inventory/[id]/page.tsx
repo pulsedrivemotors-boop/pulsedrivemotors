@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
+import { isPublicStatus } from "@/lib/vehicleStatus";
 import TaxCalculator from "@/components/TaxCalculator";
 import FinancingCalculator from "@/components/FinancingCalculator";
 import VehicleCard from "@/components/VehicleCard";
@@ -48,7 +49,7 @@ export default async function VehicleDetailPage({ params }: Props) {
   const { id } = await params;
 
   const raw = await prisma.vehicle.findFirst({ where: { id, deletedAt: null } });
-  if (!raw) notFound();
+  if (!raw || !isPublicStatus(raw.status)) notFound();
 
   const vehicle = {
     ...raw,

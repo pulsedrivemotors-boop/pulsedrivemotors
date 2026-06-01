@@ -3,12 +3,7 @@ import { useEffect, useState, useCallback, useRef } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Plus, Search, Edit, Trash2, Star, ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react'
-
-const STATUS_STYLES: Record<string, string> = {
-  available: 'bg-lime-500/20 text-lime-400 border-lime-500/30',
-  reserved: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
-  sold: 'bg-gray-500/20 text-gray-400 border-gray-500/30',
-}
+import { VEHICLE_STATUSES } from '@/lib/vehicleStatus'
 
 export default function AdminVehiclesPage() {
   const [vehicles, setVehicles] = useState<any[]>([])
@@ -93,9 +88,9 @@ export default function AdminVehiclesPage() {
         <select value={status} onChange={e => setStatus(e.target.value)}
           className="bg-[#1a1a1a] border border-white/20 text-white rounded-lg px-3 py-2 text-sm focus:border-lime-500 focus:outline-none">
           <option value="">All Status</option>
-          <option value="available">Available</option>
-          <option value="reserved">Reserved</option>
-          <option value="sold">Sold</option>
+          {VEHICLE_STATUSES.map(s => (
+            <option key={s.value} value={s.value}>{s.label}</option>
+          ))}
         </select>
       </div>
 
@@ -193,11 +188,7 @@ export default function AdminVehiclesPage() {
 }
 
 // ── Status dropdown component ────────────────────────────────────────────────
-const STATUS_OPTIONS = [
-  { value: 'available', label: 'Available', style: 'bg-lime-500/20 text-lime-400 border-lime-500/30' },
-  { value: 'reserved',  label: 'Reserved',  style: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' },
-  { value: 'sold',      label: 'Sold',      style: 'bg-gray-500/20 text-gray-400 border-gray-500/30' },
-]
+const STATUS_OPTIONS = VEHICLE_STATUSES.map(s => ({ value: s.value, label: s.label, style: s.badge, dot: s.dot }))
 
 function StatusDropdown({ vehicle, onChangeStatus }: { vehicle: any; onChangeStatus: (s: string) => void }) {
   const [open, setOpen] = useState(false)
@@ -229,15 +220,12 @@ function StatusDropdown({ vehicle, onChangeStatus }: { vehicle: any; onChangeSta
             <button
               key={opt.value}
               onClick={() => { onChangeStatus(opt.value); setOpen(false) }}
-              className={`w-full text-left px-3 py-2 text-xs transition-colors hover:bg-white/10 flex items-center gap-2 ${
+              className={`w-full text-left px-3 py-2 text-xs transition-colors hover:bg-white/10 flex items-center gap-2 text-gray-300 ${
                 opt.value === vehicle.status ? 'opacity-40 cursor-default' : ''
-              } ${opt.style.includes('lime') ? 'text-lime-400' : opt.style.includes('yellow') ? 'text-yellow-400' : 'text-gray-400'}`}
+              }`}
               disabled={opt.value === vehicle.status}
             >
-              <span className={`w-1.5 h-1.5 rounded-full ${
-                opt.value === 'available' ? 'bg-lime-400' :
-                opt.value === 'reserved'  ? 'bg-yellow-400' : 'bg-gray-400'
-              }`} />
+              <span className={`w-1.5 h-1.5 rounded-full ${opt.dot}`} />
               {opt.label}
             </button>
           ))}

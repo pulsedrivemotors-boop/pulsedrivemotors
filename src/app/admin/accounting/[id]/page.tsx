@@ -1,7 +1,8 @@
 "use client"
 import { useEffect, useState, use } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, Plus, Trash2, TrendingUp, TrendingDown, DollarSign, Save } from 'lucide-react'
+import { ArrowLeft, Plus, Trash2, DollarSign, Save } from 'lucide-react'
+import { STATUS_BADGE, STATUS_LABEL } from '@/lib/vehicleStatus'
 
 const CATEGORIES = ['Purchase', 'Parts', 'Repair', 'Transport', 'Detailing', 'Advertising', 'Inspection', 'Other']
 
@@ -31,6 +32,7 @@ export default function AccountingDetailPage({ params }: { params: Promise<{ id:
   const [soldInput, setSoldInput] = useState('')
   const [purchaseDateInput, setPurchaseDateInput] = useState('')
   const [soldDateInput, setSoldDateInput] = useState('')
+  const [soldChecked, setSoldChecked] = useState(false) // mirrors status === 'sold'
 
   const showToast = (msg: string, ok = true) => {
     setToast({ msg, ok })
@@ -47,6 +49,7 @@ export default function AccountingDetailPage({ params }: { params: Promise<{ id:
         setSoldInput(d.vehicle.soldPrice !== null ? String(d.vehicle.soldPrice) : '')
         setPurchaseDateInput(d.vehicle.purchaseDate ? d.vehicle.purchaseDate.slice(0, 10) : '')
         setSoldDateInput(d.vehicle.soldDate ? d.vehicle.soldDate.slice(0, 10) : '')
+        setSoldChecked(d.vehicle.status === 'sold')
         setLoading(false)
       })
   }
@@ -55,6 +58,10 @@ export default function AccountingDetailPage({ params }: { params: Promise<{ id:
 
   const savePrices = async () => {
     setSaving(true)
+    // Sold checkbox drives the site-wide status: checked → 'sold';
+    // unchecked while currently sold → revert to 'available'; otherwise unchanged.
+    const currentStatus = data.vehicle.status
+    const status = soldChecked ? 'sold' : (currentStatus === 'sold' ? 'available' : currentStatus)
     const res = await fetch(`/api/admin/accounting/vehicle/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
@@ -63,10 +70,11 @@ export default function AccountingDetailPage({ params }: { params: Promise<{ id:
         soldPrice: soldInput,
         purchaseDate: purchaseDateInput,
         soldDate: soldDateInput,
+        status,
       }),
     })
     setSaving(false)
-    if (res.ok) { showToast('Prices saved'); load() }
+    if (res.ok) { showToast(soldChecked ? 'Saved — marked as Sold' : 'Saved'); load() }
     else showToast('Failed to save', false)
   }
 
@@ -120,7 +128,12 @@ export default function AccountingDetailPage({ params }: { params: Promise<{ id:
             {vehicle.year} {vehicle.make} {vehicle.model}
             {vehicle.trim && <span className="text-gray-400 font-normal text-lg ml-2">{vehicle.trim}</span>}
           </h1>
-          <p className="text-gray-500 text-sm">VIN: {vehicle.vin}</p>
+          <div className="flex items-center gap-2 mt-1">
+            <span className={`text-xs px-2 py-0.5 rounded-full border capitalize ${STATUS_BADGE[vehicle.status] ?? 'bg-gray-500/20 text-gray-400 border-gray-500/30'}`}>
+              {STATUS_LABEL[vehicle.status] ?? vehicle.status}
+            </span>
+            <p className="text-gray-500 text-sm">VIN: {vehicle.vin}</p>
+          </div>
         </div>
       </div>
 
@@ -191,9 +204,30 @@ export default function AccountingDetailPage({ params }: { params: Promise<{ id:
             />
           </div>
         </div>
+        {/* Sold toggle — changes the vehicle status across the whole site */}
+        <label className="mt-5 flex items-start gap-3 cursor-pointer select-none">
+          <input
+            type="checkbox"
+            checked={soldChecked}
+            onChange={e => {
+              const checked = e.target.checked
+              setSoldChecked(checked)
+              // Default the sale date to today when marking sold and none is set yet
+              if (checked && !soldDateInput) setSoldDateInput(new Date().toISOString().slice(0, 10))
+            }}
+            className="mt-0.5 w-4 h-4 accent-lime-500"
+          />
+          <span>
+            <span className="text-white text-sm font-medium">Sold</span>
+            <span className="block text-gray-500 text-xs">
+              Marks this vehicle as <b>Sold</b> everywhere on the site (inventory, public pages). Unchecking reverts it to Available.
+            </span>
+          </span>
+        </label>
+
         <button onClick={savePrices} disabled={saving}
           className="mt-4 flex items-center gap-2 bg-lime-500 hover:bg-lime-400 disabled:opacity-50 text-black font-bold px-4 py-2 rounded-lg text-sm transition-colors">
-          <Save size={14} /> {saving ? 'Saving...' : 'Save'}
+          <Save size={14} /> {saving ? 'Saving...' : 'Save Changes'}
         </button>
         {summary.daysToSell !== null && (
           <p className="mt-3 text-sm text-gray-400">

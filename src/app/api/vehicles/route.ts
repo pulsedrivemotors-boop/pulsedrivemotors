@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { isPublicStatus } from '@/lib/vehicleStatus'
 
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl
@@ -10,7 +11,9 @@ export async function GET(request: NextRequest) {
   const maxPrice = searchParams.get('maxPrice') ? Number(searchParams.get('maxPrice')) : undefined
   const maxOdometer = searchParams.get('maxOdometer') ? Number(searchParams.get('maxOdometer')) : undefined
 
-  const status = searchParams.get('status') || 'available'
+  // Clamp to public statuses so private ones (e.g. in-process) can't be exposed via ?status=
+  const requestedStatus = searchParams.get('status') || 'available'
+  const status = isPublicStatus(requestedStatus) ? requestedStatus : 'available'
 
   const vehicles = await prisma.vehicle.findMany({
     where: {

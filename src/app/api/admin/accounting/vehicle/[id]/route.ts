@@ -2,10 +2,13 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { VEHICLE_STATUSES } from '@/lib/vehicleStatus'
 
 function isOwner(session: any) {
   return session?.user?.role === 'OWNER'
 }
+
+const VALID_STATUSES = VEHICLE_STATUSES.map(s => s.value as string)
 
 // PATCH /api/admin/accounting/vehicle/[id]  — update purchasePrice / soldPrice
 export async function PATCH(
@@ -23,6 +26,19 @@ export async function PATCH(
   if (body.soldPrice     !== undefined) data.soldPrice     = body.soldPrice     === '' ? null : parseFloat(body.soldPrice)
   if (body.purchaseDate  !== undefined) data.purchaseDate  = body.purchaseDate  === '' ? null : new Date(body.purchaseDate)
   if (body.soldDate      !== undefined) data.soldDate      = body.soldDate      === '' ? null : new Date(body.soldDate)
+
+  // Status change propagates to the whole site (inventory, public pages, etc.)
+  if (body.status !== undefined) {
+    if (!VALID_STATUSES.includes(body.status)) {
+      return NextResponse.json({ error: 'Invalid status' }, { status: 400 })
+    }
+    data.status = body.status
+    // Marking sold without an explicit sale date → default it to today so it
+    // shows up in the accounting month filter.
+    if (body.status === 'sold' && (data.soldDate === undefined || data.soldDate === null)) {
+      data.soldDate = new Date()
+    }
+  }
 
   const vehicle = await prisma.vehicle.update({ where: { id }, data })
   return NextResponse.json(vehicle)

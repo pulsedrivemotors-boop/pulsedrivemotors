@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { Save, ArrowLeft, Loader2, CheckCircle, AlertCircle, Sparkles } from 'lucide-react'
 import Link from 'next/link'
 import PhotoUploader from './PhotoUploader'
+import { VEHICLE_STATUSES } from '@/lib/vehicleStatus'
 
 // Map NHTSA values → our form values
 function mapBodyType(v: string): string {
@@ -354,9 +355,9 @@ export default function VehicleForm({ initialData, mode }: Props) {
             <div>
               <label className={labelClass}>Status</label>
               <select value={form.status} onChange={e => set('status', e.target.value)} className={inputClass}>
-                <option value="available">Available</option>
-                <option value="reserved">Reserved</option>
-                <option value="sold">Sold</option>
+                {VEHICLE_STATUSES.map(s => (
+                  <option key={s.value} value={s.value}>{s.label}</option>
+                ))}
               </select>
             </div>
             <div className="flex items-end">

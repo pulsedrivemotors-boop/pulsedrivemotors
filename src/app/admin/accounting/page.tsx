@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { TrendingUp, TrendingDown, DollarSign, Car, ChevronRight, Calendar, X, Download, FileText, FileSpreadsheet, ChevronDown } from 'lucide-react'
 import Papa from 'papaparse'
+import { VEHICLE_STATUSES, STATUS_LABEL, STATUS_TEXT } from '@/lib/vehicleStatus'
 
 const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 function monthLabel(ym: string) {
@@ -17,21 +18,11 @@ function fmt(n: number | null, currency = true) {
   return n < 0 ? `-${s}` : s
 }
 
-const STATUS_LABEL: Record<string, string> = {
-  available: 'Available',
-  reserved: 'Reserved',
-  sold: 'Sold',
-}
-const STATUS_COLOR: Record<string, string> = {
-  available: 'text-lime-400',
-  reserved: 'text-yellow-400',
-  sold: 'text-gray-400',
-}
 
 export default function AccountingPage() {
   const [data, setData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
-  const [filter, setFilter] = useState<'all' | 'available' | 'sold'>('all')
+  const [filter, setFilter] = useState<string>('all') // 'all' or a vehicle status
   const [monthFilter, setMonthFilter] = useState('') // empty = all time, otherwise 'YYYY-MM'
   const [exportOpen, setExportOpen] = useState(false)
 
@@ -253,9 +244,9 @@ export default function AccountingPage() {
 
       {/* Filter */}
       <div className="flex flex-wrap items-center gap-2 mb-5">
-        {(['all', 'available', 'sold'] as const).map(f => (
+        {['all', ...VEHICLE_STATUSES.map(s => s.value)].map(f => (
           <button key={f} onClick={() => { setFilter(f); if (f !== 'sold') setMonthFilter('') }}
-            className={`px-4 py-1.5 rounded-lg text-sm transition-colors capitalize ${
+            className={`px-4 py-1.5 rounded-lg text-sm transition-colors ${
               filter === f ? 'bg-lime-500 text-black font-bold' : 'bg-white/5 text-gray-400 hover:text-white'
             }`}>
             {f === 'all' ? 'All' : STATUS_LABEL[f]}
@@ -327,7 +318,7 @@ export default function AccountingPage() {
                   <tr key={r.id} className="border-b border-white/5 hover:bg-white/[0.03] transition-colors">
                     <td className="px-4 py-3">
                       <p className="text-white font-medium">{r.name}</p>
-                      <span className={`text-xs ${STATUS_COLOR[r.status] ?? 'text-gray-500'}`}>
+                      <span className={`text-xs ${STATUS_TEXT[r.status] ?? 'text-gray-500'}`}>
                         {STATUS_LABEL[r.status] ?? r.status}
                       </span>
                     </td>
