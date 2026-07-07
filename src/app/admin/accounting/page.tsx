@@ -42,8 +42,11 @@ export default function AccountingPage() {
   const filtered = useMemo(() => {
     if (!data) return []
     return data.rows.filter((r: any) => {
-      if (filter !== 'all' && r.status !== filter) return false
-      // Month filter only applies to the Sold tab
+      // "All" tab shows only active inventory — available or in-process
+      if (filter === 'all') return r.status === 'available' || r.status === 'in-process'
+      // Every other tab filters by its exact status
+      if (r.status !== filter) return false
+      // Month filter only applies on the Sold tab
       if (filter === 'sold' && monthFilter) {
         if (!r.soldDate || r.soldDate.slice(0, 7) !== monthFilter) return false
       }
@@ -53,7 +56,7 @@ export default function AccountingPage() {
 
   const computedStats = useMemo(() => {
     if (!data) return null
-    if (!(filter === 'sold' && monthFilter)) return data.stats
+    // Stats always reflect the currently visible rows so the KPI cards match the table.
     const sold = filtered.filter((r: any) => r.profit !== null)
     const totalProfit = sold.reduce((s: number, r: any) => s + r.profit, 0)
     const totalInvested = filtered.reduce((s: number, r: any) => s + r.totalInvested, 0)
@@ -67,7 +70,7 @@ export default function AccountingPage() {
       totalInvested,
       avgProfitPct,
     }
-  }, [data, filtered, filter, monthFilter])
+  }, [data, filtered])
 
   if (loading || !data || !computedStats) return (
     <div className="flex items-center justify-center h-96">
@@ -77,12 +80,18 @@ export default function AccountingPage() {
 
   const stats = computedStats
 
-  // ---- Export (sold cars, respects month filter) ----
-  const exportScope = filter === 'sold' && monthFilter ? monthLabel(monthFilter) : 'All time'
-  const exportSlug = filter === 'sold' && monthFilter ? monthFilter : 'all-time'
+  // ---- Export (sold cars, respects the sale-month filter regardless of active tab) ----
+  const exportMonth = filter === 'sold' ? monthFilter : ''
+  const exportScope = exportMonth ? monthLabel(exportMonth) : 'All time'
+  const exportSlug = exportMonth || 'all-time'
+
+  const soldForExport = () =>
+    (data?.rows ?? []).filter((r: any) =>
+      r.status === 'sold' && (!exportMonth || (r.soldDate && r.soldDate.slice(0, 7) === exportMonth))
+    )
 
   function buildExportRows() {
-    const sold = filtered.filter((r: any) => r.status === 'sold')
+    const sold = soldForExport()
     return sold.map((r: any) => ({
       Vehicle: r.name,
       'Sold Date': r.soldDate ? r.soldDate.slice(0, 10) : '',
@@ -117,7 +126,7 @@ export default function AccountingPage() {
 
   function exportPDF() {
     const rows = buildExportRows()
-    const soldRows = filtered.filter((r: any) => r.status === 'sold')
+    const soldRows = soldForExport()
     const totalProfit = soldRows.reduce((s: number, r: any) => s + (r.profit ?? 0), 0)
     const totalInvested = soldRows.reduce((s: number, r: any) => s + (r.totalInvested ?? 0), 0)
     const totalSold = soldRows.reduce((s: number, r: any) => s + (r.soldPrice ?? 0), 0)
