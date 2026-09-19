@@ -3,9 +3,10 @@ import { prisma } from '@/lib/prisma'
 
 const SITE = 'https://pulsedrivemotors.ca'
 
-// Rebuild the sitemap at most once an hour so new inventory/posts appear
-// without hitting the DB on every crawl.
-export const revalidate = 3600
+// Render at request time so the sitemap always reflects the live inventory.
+// (A build-time prerender would bake an empty list, since the prod DB isn't
+// attached during `next build`.)
+export const dynamic = 'force-dynamic'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticPages: MetadataRoute.Sitemap = [
