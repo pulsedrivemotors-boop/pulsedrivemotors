@@ -4,6 +4,30 @@ import { useState } from "react";
 import FinancingCalculator from "@/components/FinancingCalculator";
 import { CreditCard, Shield, Clock, CheckCircle, ChevronDown } from "lucide-react";
 import { PROVINCES } from "@/data/vehicles";
+import FaqSection, { type FaqItem } from "@/components/FaqSection";
+
+const FINANCING_FAQ: FaqItem[] = [
+  {
+    q: "Can I get car financing in Calgary with bad credit?",
+    a: "Yes. Pulse Drive Motors works with multiple Canadian lenders and helps buyers with all credit situations — good, bad, or no credit history. Submit our online application and we'll match you with the best available rate.",
+  },
+  {
+    q: "How do I get pre-approved for a used car loan?",
+    a: "Fill out our online financing application with your basic income and employment details. Pre-approval usually takes just a few minutes and helps you shop with a clear budget.",
+  },
+  {
+    q: "What documents do I need to finance a vehicle?",
+    a: "Typically a valid Alberta driver's licence, proof of income (recent pay stubs or bank statements), and proof of address. Our team will confirm exactly what's needed for your situation.",
+  },
+  {
+    q: "Do I need a down payment?",
+    a: "A down payment isn't always required, but putting money down lowers your monthly payment and the total interest you pay. We'll work with whatever budget you have.",
+  },
+  {
+    q: "What sales tax do I pay on a used car in Alberta?",
+    a: "Alberta has no provincial sales tax (PST) on vehicles — you pay only 5% GST when buying from a dealer. Use our financing calculator to estimate your all-in monthly payment.",
+  },
+];
 
 export default function FinancingPage() {
   const [submitted, setSubmitted] = useState(false);
@@ -196,6 +220,8 @@ export default function FinancingPage() {
           </div>
         </div>
       </div>
+
+      <FaqSection title="Financing FAQ" items={FINANCING_FAQ} />
     </div>
   );
 }

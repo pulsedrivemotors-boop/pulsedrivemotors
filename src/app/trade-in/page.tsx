@@ -2,6 +2,30 @@
 
 import { useState } from "react";
 import { RefreshCcw, CheckCircle, TrendingUp, Clock, DollarSign } from "lucide-react";
+import FaqSection, { type FaqItem } from "@/components/FaqSection";
+
+const TRADEIN_FAQ: FaqItem[] = [
+  {
+    q: "How do I find out what my car is worth as a trade-in?",
+    a: "Submit your vehicle details — make, model, year, mileage and condition — through our trade-in form and we'll give you a fair, no-obligation valuation.",
+  },
+  {
+    q: "Can I trade in a car that isn't fully paid off?",
+    a: "Yes. If you still owe money, we can pay out your existing loan and roll any remaining balance into your new financing. Bring your latest loan statement so we can calculate the payout.",
+  },
+  {
+    q: "Do I have to buy a car to get a trade-in offer?",
+    a: "No — there's no obligation. You're free to get a valuation and decide later. Most customers apply the trade value toward a vehicle from our Calgary inventory.",
+  },
+  {
+    q: "How does a trade-in lower my taxes in Alberta?",
+    a: "When you trade in, GST (5%) is calculated on the difference between the new vehicle's price and your trade-in value — so a trade-in can meaningfully reduce the tax you pay.",
+  },
+  {
+    q: "What condition does my vehicle need to be in?",
+    a: "We accept vehicles in all conditions. Damage or higher mileage may affect the value, but we always make a fair offer — just describe the condition honestly in the form.",
+  },
+];
 
 export default function TradeInPage() {
   const [step, setStep] = useState(1);
@@ -216,6 +240,8 @@ export default function TradeInPage() {
           </div>
         )}
       </div>
+
+      <FaqSection title="Trade-In FAQ" items={TRADEIN_FAQ} />
     </div>
   );
 }
