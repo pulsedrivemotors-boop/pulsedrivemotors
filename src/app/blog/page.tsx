@@ -1,7 +1,12 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { BookOpen, Clock, ChevronRight, PenSquare } from "lucide-react";
+
+export const metadata: Metadata = {
+  alternates: { canonical: "/blog" },
+};
 
 function timeAgo(date: Date): string {
   const now = new Date();

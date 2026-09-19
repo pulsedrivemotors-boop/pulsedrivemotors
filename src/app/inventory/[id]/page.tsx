@@ -37,6 +37,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `${title} | Pulse Drive Motors`,
     description: raw.description || `${title} — $${raw.price.toLocaleString()} CAD. Certified pre-owned at Pulse Drive Motors, Calgary AB.`,
+    alternates: {
+      canonical: `/inventory/${id}`,
+    },
     openGraph: {
       title: `${title} — $${raw.price.toLocaleString()} CAD`,
       description: raw.description || `Certified pre-owned ${title} available at Pulse Drive Motors in Calgary, Alberta.`,

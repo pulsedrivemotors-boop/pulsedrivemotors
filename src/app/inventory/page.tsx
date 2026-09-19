@@ -1,5 +1,10 @@
+import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import InventoryClient from "@/components/InventoryClient";
+
+export const metadata: Metadata = {
+  alternates: { canonical: "/inventory" },
+};
 
 interface Props {
   searchParams: Promise<{ status?: string }>;

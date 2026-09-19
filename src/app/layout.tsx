@@ -14,14 +14,20 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://pulsedrivemotors.ca"),
   title: "Pulse Drive Motors | Certified Pre-Owned Vehicles in Alberta",
   description:
     "Alberta's trusted certified pre-owned vehicle dealer. Browse our inventory of used cars, SUVs, and trucks. Financing, trade-ins, and car rentals available. AMVIC licensed.",
   keywords: "used cars Alberta, certified pre-owned vehicles, car dealer Alberta, auto financing Canada, trade-in, used SUV, used trucks",
+  alternates: {
+    canonical: "/",
+  },
   openGraph: {
     title: "Pulse Drive Motors | Certified Pre-Owned Vehicles in Alberta",
     description: "Browse certified pre-owned vehicles with transparent pricing, CARFAX reports, and flexible financing options.",
     type: "website",
+    url: "https://pulsedrivemotors.ca",
+    siteName: "Pulse Drive Motors",
   },
 };
 
