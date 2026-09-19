@@ -34,12 +34,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!raw) return { title: "Vehicle Not Found" };
   const title = `${raw.year} ${raw.make} ${raw.model} ${raw.trim ?? ""}`.trim();
   const photos = JSON.parse(raw.photos || "[]") as string[];
+  const isSold = raw.status === "sold";
   return {
-    title: `${title} for Sale in Calgary, AB | Pulse Drive Motors`,
+    title: isSold
+      ? `${title} (Sold) | Pulse Drive Motors`
+      : `${title} for Sale in Calgary, AB | Pulse Drive Motors`,
     description: raw.description || `${title} — $${raw.price.toLocaleString()} CAD. Certified pre-owned at Pulse Drive Motors, Calgary AB.`,
-    alternates: {
-      canonical: `/inventory/${id}`,
-    },
+    // Sold vehicles are unique and gone — keep the page reachable but out of the
+    // index so stale listings don't dilute the site; active listings stay indexed.
+    ...(isSold
+      ? { robots: { index: false, follow: true } }
+      : { alternates: { canonical: `/inventory/${id}` } }),
     openGraph: {
       title: `${title} — $${raw.price.toLocaleString()} CAD`,
       description: raw.description || `Certified pre-owned ${title} available at Pulse Drive Motors in Calgary, Alberta.`,

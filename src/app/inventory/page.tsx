@@ -9,13 +9,18 @@ interface Props {
 export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
   const { status } = await searchParams;
   const isSold = status === "sold";
+  if (isSold) {
+    // The sold listing is a filtered, low-value view — keep it crawlable but
+    // out of the index so it doesn't compete with the main inventory page.
+    return {
+      title: "Recently Sold Vehicles | Pulse Drive Motors Calgary",
+      description: "Recently sold certified pre-owned vehicles at Pulse Drive Motors — your used car dealer in Calgary, Alberta.",
+      robots: { index: false, follow: true },
+    };
+  }
   return {
-    title: isSold
-      ? "Recently Sold Vehicles | Pulse Drive Motors Calgary"
-      : "Used Cars, SUVs & Trucks for Sale in Calgary, AB | Pulse Drive Motors",
-    description: isSold
-      ? "Recently sold certified pre-owned vehicles at Pulse Drive Motors — your used car dealer in Calgary, Alberta."
-      : "Browse our full inventory of certified pre-owned cars, SUVs and trucks for sale in Calgary, Alberta. Transparent pricing, CARFAX reports and flexible financing.",
+    title: "Used Cars, SUVs & Trucks for Sale in Calgary, AB | Pulse Drive Motors",
+    description: "Browse our full inventory of certified pre-owned cars, SUVs and trucks for sale in Calgary, Alberta. Transparent pricing, CARFAX reports and flexible financing.",
     alternates: { canonical: "/inventory" },
   };
 }
