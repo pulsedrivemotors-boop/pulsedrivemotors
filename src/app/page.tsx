@@ -105,7 +105,8 @@ export default async function HomePage() {
             <span className="text-lime-400">Perfect Drive</span>
           </h1>
           <p className="text-gray-400 text-lg sm:text-xl max-w-2xl mx-auto mb-10">
-            Alberta&apos;s certified pre-owned vehicle dealer. Transparent pricing, CARFAX reports,
+            Calgary&apos;s certified pre-owned vehicle dealer, serving all of Alberta.
+            Used cars, SUVs and trucks with transparent pricing, CARFAX reports, and
             flexible financing — all in one place.
           </p>
 

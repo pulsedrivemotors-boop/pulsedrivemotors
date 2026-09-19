@@ -18,10 +18,10 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://pulsedrivemotors.ca"),
-  title: "Pulse Drive Motors | Certified Pre-Owned Vehicles in Alberta",
+  title: "Used Cars for Sale in Calgary, AB | Pulse Drive Motors",
   description:
-    "Alberta's trusted certified pre-owned vehicle dealer. Browse our inventory of used cars, SUVs, and trucks. Financing, trade-ins, and car rentals available. AMVIC licensed.",
-  keywords: "used cars Alberta, certified pre-owned vehicles, car dealer Alberta, auto financing Canada, trade-in, used SUV, used trucks",
+    "Calgary's trusted certified pre-owned vehicle dealer, serving all of Alberta. Browse used cars, SUVs and trucks with transparent pricing, CARFAX reports, and flexible financing. AMVIC licensed.",
+  keywords: "used cars Calgary, used cars for sale Calgary, certified pre-owned Calgary, car dealer Calgary, used SUV Calgary, used trucks Alberta, auto financing Calgary, trade-in Calgary",
   alternates: {
     canonical: "/",
   },
@@ -29,11 +29,12 @@ export const metadata: Metadata = {
     google: "-4LGrnyigp-p1nfMgi3CCNEqItfFa4QUqdGNiHhEn0s",
   },
   openGraph: {
-    title: "Pulse Drive Motors | Certified Pre-Owned Vehicles in Alberta",
-    description: "Browse certified pre-owned vehicles with transparent pricing, CARFAX reports, and flexible financing options.",
+    title: "Used Cars for Sale in Calgary, AB | Pulse Drive Motors",
+    description: "Calgary's certified pre-owned vehicle dealer. Used cars, SUVs and trucks with transparent pricing, CARFAX reports, and flexible financing.",
     type: "website",
     url: "https://pulsedrivemotors.ca",
     siteName: "Pulse Drive Motors",
+    locale: "en_CA",
   },
 };
 

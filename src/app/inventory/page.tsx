@@ -2,12 +2,22 @@ import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import InventoryClient from "@/components/InventoryClient";
 
-export const metadata: Metadata = {
-  alternates: { canonical: "/inventory" },
-};
-
 interface Props {
   searchParams: Promise<{ status?: string }>;
+}
+
+export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
+  const { status } = await searchParams;
+  const isSold = status === "sold";
+  return {
+    title: isSold
+      ? "Recently Sold Vehicles | Pulse Drive Motors Calgary"
+      : "Used Cars, SUVs & Trucks for Sale in Calgary, AB | Pulse Drive Motors",
+    description: isSold
+      ? "Recently sold certified pre-owned vehicles at Pulse Drive Motors — your used car dealer in Calgary, Alberta."
+      : "Browse our full inventory of certified pre-owned cars, SUVs and trucks for sale in Calgary, Alberta. Transparent pricing, CARFAX reports and flexible financing.",
+    alternates: { canonical: "/inventory" },
+  };
 }
 
 export const dynamic = "force-dynamic"; // Всегда рендерить свежие данные при загрузке страницы
@@ -40,5 +50,28 @@ export default async function InventoryPage({ searchParams }: Props) {
     console.error('[InventoryPage] DB query failed, rendering empty list:', err);
   }
 
-  return <InventoryClient vehicles={vehicles} isSoldView={isSoldView} />;
+  const itemListJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "name": isSoldView ? "Recently Sold Vehicles" : "Used Vehicles for Sale in Calgary",
+    "numberOfItems": vehicles.length,
+    "itemListElement": vehicles.map((v, i) => ({
+      "@type": "ListItem",
+      "position": i + 1,
+      "url": `https://pulsedrivemotors.ca/inventory/${v.id}`,
+      "name": `${v.year} ${v.make} ${v.model}${v.trim ? " " + v.trim : ""}`.trim(),
+    })),
+  };
+
+  return (
+    <>
+      {vehicles.length > 0 && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }}
+        />
+      )}
+      <InventoryClient vehicles={vehicles} isSoldView={isSoldView} />
+    </>
+  );
 }

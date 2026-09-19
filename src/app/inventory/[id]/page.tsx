@@ -35,7 +35,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const title = `${raw.year} ${raw.make} ${raw.model} ${raw.trim ?? ""}`.trim();
   const photos = JSON.parse(raw.photos || "[]") as string[];
   return {
-    title: `${title} | Pulse Drive Motors`,
+    title: `${title} for Sale in Calgary, AB | Pulse Drive Motors`,
     description: raw.description || `${title} — $${raw.price.toLocaleString()} CAD. Certified pre-owned at Pulse Drive Motors, Calgary AB.`,
     alternates: {
       canonical: `/inventory/${id}`,

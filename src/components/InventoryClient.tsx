@@ -263,7 +263,7 @@ export default function InventoryClient({ vehicles, isSoldView }: Props) {
       <div className="bg-gray-950 border-b border-white/5 py-5 px-4 sm:px-6">
         <div className="max-w-7xl mx-auto">
           <h1 className="text-3xl font-bold text-white mb-1">
-            {isSoldView ? "Sold Vehicles" : "Browse Our Inventory"}
+            {isSoldView ? "Recently Sold Vehicles" : "Used Cars for Sale in Calgary, AB"}
           </h1>
           <p className="text-gray-400 text-sm">
             {isSoldView

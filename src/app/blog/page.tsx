@@ -5,6 +5,9 @@ import { prisma } from "@/lib/prisma";
 import { BookOpen, Clock, ChevronRight, PenSquare } from "lucide-react";
 
 export const metadata: Metadata = {
+  title: "Car Buying Guides & Tips for Alberta Drivers | Pulse Drive Motors",
+  description:
+    "Advice on buying used cars in Alberta — financing, taxes, winter driving, trade-ins and more. Guides from Pulse Drive Motors, your Calgary certified pre-owned dealer.",
   alternates: { canonical: "/blog" },
 };
 
