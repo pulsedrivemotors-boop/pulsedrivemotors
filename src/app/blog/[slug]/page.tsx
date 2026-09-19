@@ -99,8 +99,34 @@ export default async function BlogPostPage({ params }: Props) {
     take: 3,
   });
 
+  const SITE = "https://pulsedrivemotors.ca";
+  const articleJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: post.title,
+    description: post.excerpt || post.title,
+    ...(post.image ? { image: [post.image] } : {}),
+    datePublished: post.createdAt.toISOString(),
+    dateModified: post.updatedAt.toISOString(),
+    author: { "@type": "Organization", name: "Pulse Drive Motors", url: SITE },
+    publisher: { "@type": "Organization", name: "Pulse Drive Motors", url: SITE },
+    mainEntityOfPage: { "@type": "WebPage", "@id": `${SITE}/blog/${slug}` },
+    ...(post.category ? { articleSection: post.category } : {}),
+  };
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: SITE },
+      { "@type": "ListItem", position: 2, name: "Blog", item: `${SITE}/blog` },
+      { "@type": "ListItem", position: 3, name: post.title, item: `${SITE}/blog/${slug}` },
+    ],
+  };
+
   return (
     <div className="min-h-screen bg-black">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
       {/* Breadcrumb */}
       <div className="bg-gray-950 border-b border-white/5 py-3 px-4 sm:px-6">
         <div className="max-w-4xl mx-auto flex items-center gap-2 text-sm text-gray-500">

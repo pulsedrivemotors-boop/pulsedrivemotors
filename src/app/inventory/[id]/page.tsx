@@ -122,11 +122,26 @@ export default async function VehicleDetailPage({ params }: Props) {
     },
   };
 
+  const vehicleName = `${vehicle.year} ${vehicle.make} ${vehicle.model} ${vehicle.trim}`.trim();
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://pulsedrivemotors.ca" },
+      { "@type": "ListItem", "position": 2, "name": "Inventory", "item": "https://pulsedrivemotors.ca/inventory" },
+      { "@type": "ListItem", "position": 3, "name": vehicleName, "item": `https://pulsedrivemotors.ca/inventory/${id}` },
+    ],
+  };
+
   return (
     <>
     <script
       type="application/ld+json"
       dangerouslySetInnerHTML={{ __html: JSON.stringify(vehicleJsonLd) }}
+    />
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
     />
     <div className="min-h-screen bg-black">
       {/* Breadcrumb */}
