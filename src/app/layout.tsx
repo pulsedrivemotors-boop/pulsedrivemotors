@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ConditionalLayout } from "@/components/ConditionalLayout";
+
+const GA_MEASUREMENT_ID = "G-JG63M4PTN3";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -78,6 +81,19 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(dealerJsonLd) }}
         />
+        {/* Google Analytics 4 */}
+        <Script
+          src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
+          strategy="afterInteractive"
+        />
+        <Script id="ga4-init" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', '${GA_MEASUREMENT_ID}');
+          `}
+        </Script>
       </head>
       <body className="min-h-full flex flex-col bg-black text-white">
         <ConditionalLayout>{children}</ConditionalLayout>
