@@ -22,9 +22,6 @@ export const metadata: Metadata = {
   description:
     "Calgary's trusted certified pre-owned vehicle dealer, serving all of Alberta. Browse used cars, SUVs and trucks with transparent pricing, CARFAX reports, and flexible financing. AMVIC licensed.",
   keywords: "used cars Calgary, used cars for sale Calgary, certified pre-owned Calgary, car dealer Calgary, used SUV Calgary, used trucks Alberta, auto financing Calgary, trade-in Calgary",
-  alternates: {
-    canonical: "/",
-  },
   verification: {
     google: "-4LGrnyigp-p1nfMgi3CCNEqItfFa4QUqdGNiHhEn0s",
   },

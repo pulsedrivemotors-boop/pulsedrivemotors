@@ -1,5 +1,6 @@
 export const dynamic = "force-dynamic";
 
+import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import HomeSearch from "@/components/HomeSearch";
@@ -17,6 +18,10 @@ import {
 import { REVIEWS } from "@/data/vehicles";
 import { prisma } from "@/lib/prisma";
 import VehicleCard from "@/components/VehicleCard";
+
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+};
 
 export default async function HomePage() {
   type VehicleRow = Awaited<ReturnType<typeof prisma.vehicle.findMany>>[number];
