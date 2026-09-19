@@ -22,6 +22,9 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "/",
   },
+  verification: {
+    google: "-4LGrnyigp-p1nfMgi3CCNEqItfFa4QUqdGNiHhEn0s",
+  },
   openGraph: {
     title: "Pulse Drive Motors | Certified Pre-Owned Vehicles in Alberta",
     description: "Browse certified pre-owned vehicles with transparent pricing, CARFAX reports, and flexible financing options.",
