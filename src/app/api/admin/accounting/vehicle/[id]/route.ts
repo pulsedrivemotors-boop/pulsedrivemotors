@@ -26,6 +26,8 @@ export async function PATCH(
   if (body.soldPrice     !== undefined) data.soldPrice     = body.soldPrice     === '' ? null : parseFloat(body.soldPrice)
   if (body.purchaseDate  !== undefined) data.purchaseDate  = body.purchaseDate  === '' ? null : new Date(body.purchaseDate)
   if (body.soldDate      !== undefined) data.soldDate      = body.soldDate      === '' ? null : new Date(body.soldDate)
+  if (body.purchaseTaxPaid    !== undefined) data.purchaseTaxPaid    = body.purchaseTaxPaid    === '' ? null : parseFloat(body.purchaseTaxPaid)
+  if (body.saleTaxCollected   !== undefined) data.saleTaxCollected   = body.saleTaxCollected   === '' ? null : parseFloat(body.saleTaxCollected)
 
   // Status change propagates to the whole site (inventory, public pages, etc.)
   if (body.status !== undefined) {
@@ -75,9 +77,17 @@ export async function GET(
   const purchaseDate = (vehicle as any).purchaseDate ?? null
   const soldDate = (vehicle as any).soldDate ?? null
   const totalInvested = purchasePrice + totalCosts
+  // Purchase/sale prices are entered net of GST — tax is tracked separately below,
+  // so it never distorts profit/margin.
   const profit = soldPrice !== null ? soldPrice - totalInvested : null
   const profitPct = profit !== null && totalInvested > 0 ? (profit / totalInvested) * 100 : null
   const daysToSell = daysBetween(purchaseDate, soldDate)
+
+  const purchaseTaxPaid = (vehicle as any).purchaseTaxPaid ?? 0
+  const saleTaxCollected = (vehicle as any).saleTaxCollected ?? null
+  const costsTaxPaid = costs.reduce((sum: number, c: any) => sum + (c.taxPaid ?? 0), 0)
+  const totalItc = purchaseTaxPaid + costsTaxPaid
+  const netGst = saleTaxCollected !== null ? saleTaxCollected - totalItc : null
 
   return NextResponse.json({
     vehicle: {
@@ -88,6 +98,8 @@ export async function GET(
       soldPrice,
       purchaseDate,
       soldDate,
+      purchaseTaxPaid,
+      saleTaxCollected,
     },
     costs,
     summary: {
@@ -100,6 +112,11 @@ export async function GET(
       purchaseDate,
       soldDate,
       daysToSell,
+      purchaseTaxPaid,
+      saleTaxCollected,
+      costsTaxPaid,
+      totalItc,
+      netGst,
     },
   })
 }

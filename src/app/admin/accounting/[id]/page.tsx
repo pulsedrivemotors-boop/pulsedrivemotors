@@ -3,6 +3,7 @@ import { useEffect, useState, use } from 'react'
 import Link from 'next/link'
 import { ArrowLeft, Plus, Trash2, DollarSign, Save } from 'lucide-react'
 import { STATUS_BADGE, STATUS_LABEL } from '@/lib/vehicleStatus'
+import { GST_RATE, calcGst } from '@/lib/tax'
 
 const CATEGORIES = ['Purchase', 'Parts', 'Repair', 'Transport', 'Detailing', 'Advertising', 'Inspection', 'Other']
 
@@ -25,7 +26,7 @@ export default function AccountingDetailPage({ params }: { params: Promise<{ id:
   const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null)
 
   // Form state for new cost
-  const [form, setForm] = useState({ category: 'Parts', description: '', amount: '', date: new Date().toISOString().slice(0, 10) })
+  const [form, setForm] = useState({ category: 'Parts', description: '', amount: '', taxPaid: '', date: new Date().toISOString().slice(0, 10) })
 
   // Purchase / sold price editing
   const [purchaseInput, setPurchaseInput] = useState('')
@@ -33,6 +34,8 @@ export default function AccountingDetailPage({ params }: { params: Promise<{ id:
   const [purchaseDateInput, setPurchaseDateInput] = useState('')
   const [soldDateInput, setSoldDateInput] = useState('')
   const [soldChecked, setSoldChecked] = useState(false) // mirrors status === 'sold'
+  const [purchaseTaxInput, setPurchaseTaxInput] = useState('')
+  const [saleTaxInput, setSaleTaxInput] = useState('')
 
   const showToast = (msg: string, ok = true) => {
     setToast({ msg, ok })
@@ -50,6 +53,8 @@ export default function AccountingDetailPage({ params }: { params: Promise<{ id:
         setPurchaseDateInput(d.vehicle.purchaseDate ? d.vehicle.purchaseDate.slice(0, 10) : '')
         setSoldDateInput(d.vehicle.soldDate ? d.vehicle.soldDate.slice(0, 10) : '')
         setSoldChecked(d.vehicle.status === 'sold')
+        setPurchaseTaxInput(d.vehicle.purchaseTaxPaid ? String(d.vehicle.purchaseTaxPaid) : '')
+        setSaleTaxInput(d.vehicle.saleTaxCollected !== null ? String(d.vehicle.saleTaxCollected) : '')
         setLoading(false)
       })
   }
@@ -70,6 +75,8 @@ export default function AccountingDetailPage({ params }: { params: Promise<{ id:
         soldPrice: soldInput,
         purchaseDate: purchaseDateInput,
         soldDate: soldDateInput,
+        purchaseTaxPaid: purchaseTaxInput,
+        saleTaxCollected: saleTaxInput,
         status,
       }),
     })
@@ -87,7 +94,7 @@ export default function AccountingDetailPage({ params }: { params: Promise<{ id:
       body: JSON.stringify({ vehicleId: id, ...form }),
     })
     if (res.ok) {
-      setForm({ category: 'Parts', description: '', amount: '', date: new Date().toISOString().slice(0, 10) })
+      setForm({ category: 'Parts', description: '', amount: '', taxPaid: '', date: new Date().toISOString().slice(0, 10) })
       showToast('Cost added')
       load()
     } else showToast('Failed to add cost', false)
@@ -158,9 +165,10 @@ export default function AccountingDetailPage({ params }: { params: Promise<{ id:
         <h2 className="text-white font-semibold mb-4 flex items-center gap-2">
           <DollarSign size={16} className="text-lime-500" /> Purchase & Sale
         </h2>
+        <p className="text-gray-500 text-xs mb-4">Enter prices before GST — tax is tracked separately below so it never distorts profit.</p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="text-gray-400 text-xs uppercase tracking-wider block mb-1.5">Purchase Price (what you paid)</label>
+            <label className="text-gray-400 text-xs uppercase tracking-wider block mb-1.5">Purchase Price (before tax)</label>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
               <input
@@ -182,7 +190,29 @@ export default function AccountingDetailPage({ params }: { params: Promise<{ id:
             />
           </div>
           <div>
-            <label className="text-gray-400 text-xs uppercase tracking-wider block mb-1.5">Sale Price (actual sold for)</label>
+            <label className="text-gray-400 text-xs uppercase tracking-wider block mb-1.5">
+              GST Paid on Purchase (ITC) <span className="normal-case text-gray-600">— leave $0 if bought privately, no GST paid</span>
+            </label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+              <input
+                type="number" min="0" step="0.01"
+                value={purchaseTaxInput}
+                onChange={e => setPurchaseTaxInput(e.target.value)}
+                placeholder="0.00"
+                className="w-full bg-black border border-white/20 text-white rounded-lg pl-7 pr-20 py-2.5 text-sm focus:border-lime-500 focus:outline-none"
+              />
+              {!!purchaseInput && (
+                <button type="button"
+                  onClick={() => setPurchaseTaxInput(String(calcGst(parseFloat(purchaseInput) || 0)))}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-xs px-2 py-1 bg-lime-500/15 hover:bg-lime-500/25 text-lime-400 rounded transition-colors">
+                  Set {GST_RATE * 100}%
+                </button>
+              )}
+            </div>
+          </div>
+          <div>
+            <label className="text-gray-400 text-xs uppercase tracking-wider block mb-1.5">Sale Price (before tax)</label>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
               <input
@@ -202,6 +232,26 @@ export default function AccountingDetailPage({ params }: { params: Promise<{ id:
               onChange={e => setSoldDateInput(e.target.value)}
               className="w-full bg-black border border-white/20 text-white rounded-lg px-3 py-2.5 text-sm focus:border-lime-500 focus:outline-none"
             />
+          </div>
+          <div>
+            <label className="text-gray-400 text-xs uppercase tracking-wider block mb-1.5">GST Collected on Sale</label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+              <input
+                type="number" min="0" step="0.01"
+                value={saleTaxInput}
+                onChange={e => setSaleTaxInput(e.target.value)}
+                placeholder="0.00"
+                className="w-full bg-black border border-white/20 text-white rounded-lg pl-7 pr-20 py-2.5 text-sm focus:border-lime-500 focus:outline-none"
+              />
+              {!!soldInput && (
+                <button type="button"
+                  onClick={() => setSaleTaxInput(String(calcGst(parseFloat(soldInput) || 0)))}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-xs px-2 py-1 bg-lime-500/15 hover:bg-lime-500/25 text-lime-400 rounded transition-colors">
+                  Set {GST_RATE * 100}%
+                </button>
+              )}
+            </div>
           </div>
         </div>
         {/* Sold toggle — changes the vehicle status across the whole site */}
@@ -234,6 +284,24 @@ export default function AccountingDetailPage({ params }: { params: Promise<{ id:
             Time from purchase to sale: <span className="text-lime-400 font-semibold">{summary.daysToSell} {summary.daysToSell === 1 ? 'day' : 'days'}</span>
           </p>
         )}
+
+        {/* GST summary for this vehicle */}
+        <div className="mt-5 pt-4 border-t border-white/10 grid grid-cols-3 gap-3">
+          <div>
+            <p className="text-gray-500 text-xs uppercase tracking-wider mb-1">GST Collected</p>
+            <p className="text-white font-semibold text-sm">{summary.saleTaxCollected !== null ? fmt(summary.saleTaxCollected) : '—'}</p>
+          </div>
+          <div>
+            <p className="text-gray-500 text-xs uppercase tracking-wider mb-1">Total ITC</p>
+            <p className="text-yellow-400 font-semibold text-sm">{summary.totalItc > 0 ? fmt(summary.totalItc) : '—'}</p>
+          </div>
+          <div>
+            <p className="text-gray-500 text-xs uppercase tracking-wider mb-1">Net GST Owed</p>
+            <p className={`font-semibold text-sm ${summary.netGst !== null && summary.netGst < 0 ? 'text-red-400' : 'text-lime-400'}`}>
+              {summary.netGst !== null ? fmt(summary.netGst) : '—'}
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* Add cost form */}
@@ -256,7 +324,7 @@ export default function AccountingDetailPage({ params }: { params: Promise<{ id:
               className="w-full bg-black border border-white/20 text-white rounded-lg px-3 py-2.5 text-sm focus:border-lime-500 focus:outline-none" />
           </div>
           <div>
-            <label className="text-gray-400 text-xs uppercase tracking-wider block mb-1.5">Amount ($)</label>
+            <label className="text-gray-400 text-xs uppercase tracking-wider block mb-1.5">Amount ($, before tax)</label>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
               <input type="number" min="0" step="0.01" required value={form.amount}
@@ -269,6 +337,23 @@ export default function AccountingDetailPage({ params }: { params: Promise<{ id:
             <label className="text-gray-400 text-xs uppercase tracking-wider block mb-1.5">Date</label>
             <input type="date" value={form.date} onChange={e => setForm(f => ({ ...f, date: e.target.value }))}
               className="w-full bg-black border border-white/20 text-white rounded-lg px-3 py-2.5 text-sm focus:border-lime-500 focus:outline-none" />
+          </div>
+          <div>
+            <label className="text-gray-400 text-xs uppercase tracking-wider block mb-1.5">GST Paid (ITC)</label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+              <input type="number" min="0" step="0.01" value={form.taxPaid}
+                onChange={e => setForm(f => ({ ...f, taxPaid: e.target.value }))}
+                placeholder="0.00"
+                className="w-full bg-black border border-white/20 text-white rounded-lg pl-7 pr-20 py-2.5 text-sm focus:border-lime-500 focus:outline-none" />
+              {!!form.amount && (
+                <button type="button"
+                  onClick={() => setForm(f => ({ ...f, taxPaid: String(calcGst(parseFloat(f.amount) || 0)) }))}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-xs px-2 py-1 bg-lime-500/15 hover:bg-lime-500/25 text-lime-400 rounded transition-colors">
+                  Set {GST_RATE * 100}%
+                </button>
+              )}
+            </div>
           </div>
           <div className="md:col-span-4">
             <button type="submit"
@@ -309,7 +394,10 @@ export default function AccountingDetailPage({ params }: { params: Promise<{ id:
                     <CategoryBadge cat={c.category} />
                   </td>
                   <td className="px-4 py-3 text-gray-400 hidden md:table-cell">{c.description || '—'}</td>
-                  <td className="px-4 py-3 text-right text-white font-medium">{fmt(c.amount)}</td>
+                  <td className="px-4 py-3 text-right text-white font-medium">
+                    {fmt(c.amount)}
+                    {c.taxPaid > 0 && <span className="block text-yellow-400/70 text-xs font-normal">+{fmt(c.taxPaid)} GST</span>}
+                  </td>
                   <td className="px-4 py-3 text-right">
                     <button onClick={() => deleteCost(c.id)}
                       className="w-7 h-7 flex items-center justify-center bg-white/5 hover:bg-red-500/20 text-gray-600 hover:text-red-400 rounded-lg transition-colors ml-auto">
