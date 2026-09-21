@@ -31,7 +31,9 @@ model Vehicle {
   price         Float         @default(0)
   discountPrice Float?
   purchasePrice Float?
+  purchaseTaxPaid Float?
   soldPrice     Float?
+  saleTaxCollected Float?
   purchaseDate  DateTime?
   soldDate      DateTime?
   photos        String        @default("[]")
@@ -58,6 +60,7 @@ model VehicleCost {
   category    String
   description String   @default("")
   amount      Float
+  taxPaid     Float    @default(0)
   date        DateTime @default(now())
   createdAt   DateTime @default(now())
 }

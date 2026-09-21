@@ -19,6 +19,7 @@ export async function GET() {
   const rows = vehicles.map((v: any) => {
     const vCosts = costs.filter((c: any) => c.vehicleId === v.id)
     const totalCosts = vCosts.reduce((s: number, c: any) => s + c.amount, 0)
+    const costsTaxPaid = vCosts.reduce((s: number, c: any) => s + (c.taxPaid ?? 0), 0)
     const purchasePrice = v.purchasePrice ?? 0
     const soldPrice = v.soldPrice ?? null
     const purchaseDate = v.purchaseDate ?? null
@@ -29,6 +30,10 @@ export async function GET() {
     const daysToSell = purchaseDate && soldDate
       ? Math.max(0, Math.round((new Date(soldDate).getTime() - new Date(purchaseDate).getTime()) / 86400000))
       : null
+    const purchaseTaxPaid = v.purchaseTaxPaid ?? 0
+    const saleTaxCollected = v.saleTaxCollected ?? null
+    const totalItc = purchaseTaxPaid + costsTaxPaid
+    const netGst = saleTaxCollected !== null ? saleTaxCollected - totalItc : null
 
     return {
       id: v.id,
@@ -46,6 +51,11 @@ export async function GET() {
       soldDate,
       daysToSell,
       costsCount: vCosts.length,
+      purchaseTaxPaid,
+      saleTaxCollected,
+      costsTaxPaid,
+      totalItc,
+      netGst,
     }
   })
 
@@ -56,6 +66,8 @@ export async function GET() {
   const avgProfitPct = sold.length > 0
     ? sold.reduce((s: number, r: any) => s + (r.profitPct ?? 0), 0) / sold.length
     : 0
+  const totalGstCollected = rows.reduce((s: number, r: any) => s + (r.saleTaxCollected ?? 0), 0)
+  const totalItc = rows.reduce((s: number, r: any) => s + r.totalItc, 0)
 
   return NextResponse.json({
     rows,
@@ -65,6 +77,9 @@ export async function GET() {
       totalProfit,
       totalInvested,
       avgProfitPct,
+      totalGstCollected,
+      totalItc,
+      netGst: totalGstCollected - totalItc,
     },
   })
 }

@@ -102,6 +102,9 @@ export default function AccountingPage() {
       Profit: r.profit ?? 0,
       'Margin %': r.profitPct !== null ? Number(r.profitPct.toFixed(1)) : '',
       'Days to Sell': r.daysToSell ?? '',
+      'GST Collected': r.saleTaxCollected ?? 0,
+      'GST ITC': r.totalItc ?? 0,
+      'Net GST': r.netGst ?? '',
     }))
   }
 

@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
   if (!isOwner(session)) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const body = await req.json()
-  const { vehicleId, category, description, amount, date } = body
+  const { vehicleId, category, description, amount, taxPaid, date } = body
 
   if (!vehicleId || !category || !amount) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
@@ -42,6 +42,7 @@ export async function POST(req: NextRequest) {
       category,
       description: description || '',
       amount: parseFloat(amount),
+      taxPaid: taxPaid ? parseFloat(taxPaid) : 0,
       date: date ? new Date(date) : new Date(),
     },
   })
